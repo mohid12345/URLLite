@@ -11,13 +11,13 @@ export const userAuthSlice = createSlice({
   reducers:{
 
    login:(state,action)=>{
-        console.log('hiiiii shaham login')
+        console.log('hiiiii mohid login')
        state.userAuthStatus=true
        localStorage.setItem("userToken",action.payload)   
    },
 
    logout:(state)=>{
-      console.log("hiiiiiiiiii shahamslaam")
+      console.log("hiiiiiiiiii mohid logout")
        state.userAuthStatus=false
        localStorage.removeItem("userToken");
    }

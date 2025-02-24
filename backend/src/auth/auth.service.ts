@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { LoginAuthDto } from './dto/Login-auth.dto';
+import { LoginAuthDto } from './dto/login-auth.dto';
 import { User } from './schemas/userSchema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
