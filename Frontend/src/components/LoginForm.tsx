@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { login } from "../Redux/userAuthSlice";
-import { signIn, signUp } from "../api/userAuth";
+import { signIn } from "../api/userAuth";
 import axios from "axios";
 
 interface LoginFormData {
