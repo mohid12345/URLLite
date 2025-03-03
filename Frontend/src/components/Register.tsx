@@ -2,7 +2,7 @@ import { Card, Input, Button, Typography } from "@material-tailwind/react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { signUp } from "../api/userAuth";
-import axios, { isAxiosError } from "axios";
+import axios from "axios";
 
 interface RegistrationData {
   email: string;

@@ -4,7 +4,7 @@ import { createSlice } from '@reduxjs/toolkit';
      userAuthStatus:localStorage.getItem("userToken")?true:false 
   }
 
-export const userAuthSlice = createSlice({
+export const userAuthSlice = createSlice({ 
   name: 'counter',
   initialState,
 

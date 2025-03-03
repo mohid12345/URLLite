@@ -6,8 +6,8 @@ import {
   Input,
 } from "@material-tailwind/react";
 import { useState } from "react";
-import { logout } from "../Redux/userAuthSlice";
-import { useNavigate } from "react-router-dom";
+// import { logout } from "../Redux/userAuthSlice";
+// import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { CreateUrl } from "../api/userAuth";
 
