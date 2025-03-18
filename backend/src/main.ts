@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import * as morgan from 'morgan';
 
 async function bootstrap() {
@@ -17,24 +16,12 @@ async function bootstrap() {
 
   console.log('✅ NestJS is starting...');
 
-  // Enable CORS with multiple allowed origins
+  // Enable CORS for all origins
   app.enableCors({
-    origin: (origin, callback) => {
-      const allowedOrigins = [
-        'http://localhost:5173',
-        'http://127.0.0.1:5173',
-        'http://yourfrontenddomain.com', // Replace with your actual frontend domain
-      ];
-
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: '*', // Allows all origins
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true, // Enable credentials (cookies, authorization headers)
+    credentials: true, // Enable credentials if needed
   });
 
   // Use Morgan for logging requests
@@ -45,6 +32,7 @@ async function bootstrap() {
 }
 
 bootstrap();
+
 
 
 
