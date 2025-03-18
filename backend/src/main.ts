@@ -12,11 +12,13 @@ async function bootstrap() {
     forbidNonWhitelisted:true
   }))
 
-  const morganLogger = new MorganLoggerService();
+  // const morganLogger = new MorganLoggerService();
 
   // Use morgan middleware with the NestJS application
-  app.use(morgan('combined', { stream: { write:(message)=>morganLogger.log(message.trim()) } }));
+  // app.use(morgan('combined', { stream: { write:(message)=>morganLogger.log(message.trim()) } }));
  
+  console.log('✅ NestJS is starting...');
+
   app.enableCors({
     origin:"http://localhost:5173",
     methods: ['GET', 'POST', 'PUT', 'DELETE'],

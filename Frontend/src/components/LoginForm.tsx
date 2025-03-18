@@ -47,8 +47,9 @@ function LoginForm() {
         });
         return
       }
-
+      sessionStorage.setItem("userId", response.data.userId);
       dispatch(login(response.data.Access_Token))
+      
       navigate("/")
 
     } catch (error) {

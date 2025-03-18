@@ -13,10 +13,10 @@ export class Url extends Document {
   longUrl:String
 
   @Prop({ required: true})
-    userUd:String
+    userId:String
   
-  @Prop({ default: 0})
-  clickCout: number
+  // @Prop({ default: 0})
+  // clickCout: number
 
   @Prop({ default: Date.now})
   createdAt: Date
