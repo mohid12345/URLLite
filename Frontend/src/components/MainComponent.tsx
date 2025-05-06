@@ -1,7 +1,5 @@
 import { Card, Button, CardBody, Typography, Input } from "@material-tailwind/react";
 import { useEffect, useState } from "react";
-// import { logout } from "../Redux/userAuthSlice";
-// import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { CreateUrl, getHistory } from "../api/userAuth";
 import { formatDistanceToNow } from "date-fns";

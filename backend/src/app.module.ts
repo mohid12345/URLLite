@@ -10,9 +10,9 @@ import { JwtModule } from '@nestjs/jwt';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true, // Makes the configuration available globally
-      envFilePath: '.env', // Path to your .env file
+      envFilePath: '.env', // Path to your .env file   
     }),
-
+   
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -21,6 +21,8 @@ import { JwtModule } from '@nestjs/jwt';
       global: true,
       inject: [ConfigService],
     }),
+
+    
 
     
     MongooseModule.forRootAsync({

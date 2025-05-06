@@ -1,7 +1,9 @@
 URL Shortener Application
 
-This is a URL shortener application built using Nest.js (TypeScript) as the backend. It allows users to shorten long URLs into compact, shareable links.
+This is a URL shortener application built using Nest.js (TypeScript) as the backend with REPOSITORY PATTERN. It allows users to shorten long URLs into compact, shareable links.
 Features
+
+    Repostory Pattern make sure app is loosley coupled, better testable and scalable.
 
     Shorten long URLs into concise, unique short URLs.
 
@@ -12,6 +14,8 @@ Features
     RESTful API for managing URLs.
 
 Technologies Used
+
+    Architectur: Repostory Pattern usign Interface and Repostory functions act as connection between services function and Database model.
 
     Backend Framework: Nest.js
 

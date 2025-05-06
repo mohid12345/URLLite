@@ -15,9 +15,6 @@ export class Url extends Document {
   @Prop({ required: true})
     userId:String
   
-  // @Prop({ default: 0})
-  // clickCout: number
-
   @Prop({ default: Date.now})
   createdAt: Date
 

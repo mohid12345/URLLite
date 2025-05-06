@@ -5,50 +5,41 @@ import {
   NotFoundException,
   UnauthorizedException,
   InternalServerErrorException,
+  Inject,
 } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { LoginAuthDto } from './dto/login-auth.dto';
-import { User } from './schemas/userSchema';
-import { Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { Url } from './schemas/urlSchema';
 import { CreateUrlDto } from './dto/create-url.dto';
-import * as jwt from 'jsonwebtoken';
 import * as shortid from 'shortid';
+import { IUserRepository, IUserRepositoryToken } from './repositories/interfaces/user.repository.interface';
+import { IUrlRepository, IUrlRepositoryToken } from './repositories/interfaces/url.repository.interface';
+import { ConfigService } from '@nestjs/config';
+
 
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(User.name) private UserModel: Model<User>,
+    @Inject(IUserRepositoryToken) private readonly userRepository: IUserRepository,
+    @Inject(IUrlRepositoryToken) private readonly urlRepository: IUrlRepository,
     private jwtService: JwtService,
-    @InjectModel(Url.name) private UrlModel: Model<Url>,
+    private readonly configService: ConfigService, //for importing env file 
   ) { }
 
   async create(createAuthDto: CreateAuthDto) {
     const { email, password, username } = createAuthDto;
-
-    // email is unique
-    const emailExeed = await this.UserModel.findOne({ email: email });
-
-    if (emailExeed) {
-      // throw new NotFoundException('Email already in use');
+    const emailExist = await this.userRepository.findByEmail(email);
+    if (emailExist) {
       throw new ConflictException('Email already in use');
     }
-
-    // password hasing
     const hashedpassword = await bcrypt.hash(password, 10);
-
-    // save
-
-    await this.UserModel.create({
+    await this.userRepository.create({
       username,
       email,
       password: hashedpassword,
     });
-
     return {
       message: 'user created sucessfully',
     };
@@ -57,21 +48,21 @@ export class AuthService {
 
   async signIn(loginAuthDto: LoginAuthDto) {
     const { email, password } = loginAuthDto;
-    const data = await this.UserModel.findOne({ email: email });
+    const existEmail = await this.userRepository.findByEmail(email);
 
-    if (!data) {
+    if (!existEmail) {
       throw new UnauthorizedException('Email is not valid');
     }
 
-    if (!(await bcrypt.compare(password, data.password))) {
+    if (!(await bcrypt.compare(password, existEmail.password))) {
       throw new UnauthorizedException('Password does not match');
     }
 
-    const payload = { userId: data._id }; // Ensure _id is available in your DB schema
+    const payload = { userId: existEmail._id }; // Ensure _id is available in your DB schema
 
     return {
       message: 'Successfully logged in',
-      userId: data._id, // Send userId in the response
+      userId: existEmail._id, // Send userId in the response
       Access_Token: await this.jwtService.sign(payload),
     };
   }
@@ -81,17 +72,18 @@ export class AuthService {
     const { url, userId } = createUrlDto;
     try {
       // Check if the long URL already exists
-      let exedUrl = await this.UrlModel.findOne({ longUrl: url });
+      let exedUrl = await this.urlRepository.findByUrl(url);
+      const baseUrl = this.configService.get<string>('LOCAL_URL')
       if (exedUrl) {
         return {
-          shortUrl: `http://localhost:5173/shortUrl/${exedUrl.shortUrl}`
+          shortUrl: `${baseUrl}${exedUrl.shortUrl}`
         };
       }
 
       // Create shortId  
       const shortId = shortid.generate();
 
-      await this.UrlModel.create({
+      await this.urlRepository.create({
         longUrl: createUrlDto.url,
         shortUrl: shortId,
         userId: userId
@@ -99,7 +91,7 @@ export class AuthService {
 
       // Return the shortUrl
       return {
-        shortUrl: `http://localhost:5173/shortUrl/${shortId}`
+        shortUrl: `${baseUrl}${shortId}`
       };
     } catch (error) {
       console.error('Token verification failed:', error);
@@ -107,88 +99,51 @@ export class AuthService {
     }
   }
 
-  // async getUrlData(id: string) {
-  //   try {
-  //     const Url = await this.UrlModel.findOne({ shortUrl: id })
-
-  //     if (!Url) {
-  //       return new BadRequestException('This Id is not validz');
-  //     }
-
-  //     return Url.longUrl
-  //   } catch (error) {
-
-  //   }
-  // }
 
   async getUrlData(id: string) {
     try {
-      const url = await this.UrlModel.findOne({ shortUrl: id });
-  
+      const url = await this.urlRepository.findLongUrlFromShort(id);
+      console.log("out url::", url);
+
+
       if (!url) {
         throw new BadRequestException('This Id is not valid'); // ❌ You were returning instead of throwing
       }
-  
+
       return url.longUrl;
     } catch (error) {
       throw new InternalServerErrorException('Error fetching URL data'); // Handle errors properly
     }
   }
-  
 
 
-  //for get user url history
-  // async getUserUrls(token: string) {
-  //   try {
-  //     // Extract userId from token
-  //     const decodedToken = this.jwtService.verify(token);
-  //     const userId = decodedToken.userId;
-  //     console.log("decoded userId", userId);
-
-  //     if (!userId) {
-  //       throw new UnauthorizedException('Invalid token');
-  //     }
-
-  //     // Fetch URLs using userId
-  //     const urls = await this.UrlModel.find({ userId }).select('-_id longUrl shortUrl clickCount createdAt');
-
-  //     if (!urls.length) {
-  //       throw new NotFoundException('No shortened URLs found for this user.');
-  //     }
-
-  //     return urls;
-  //   } catch (error) {
-  //     throw new UnauthorizedException('Invalid or expired token');
-  //   }
-  // }
-
-  async getUserUrls(token: string) {
+  async getUserUrls(token: string) { //for getting history urls of user
     try {
       // Verify and decode token
       const decodedToken = this.jwtService.verify(token);
       const userId = decodedToken.userId;
-  
+
       if (!userId) {
         throw new UnauthorizedException('Invalid token');
       }
-  
+
       // Fetch URLs using userId
-      const urls = await this.UrlModel.find({ userId }).select('-_id longUrl shortUrl clickCount createdAt');
-  
+      const urls = await this.urlRepository.findByUserId(userId);
+
       if (!urls || urls.length === 0) {
         throw new NotFoundException('No shortened URLs found for this user.');
       }
-  
+
       return urls;
     } catch (error) {
       if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
         throw new UnauthorizedException('Invalid or expired token');
       }
-  
+
       throw new InternalServerErrorException('Failed to fetch user URLs');
     }
   }
-  
+
 
 
 
