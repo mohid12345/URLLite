@@ -145,12 +145,12 @@ function MainComponent() {
                                                 <td className={classes}>
                                                     <Typography variant="small" color="blue-gray" className="font-normal">
                                                         <a
-                                                            href={`http://localhost:5173/shortUrl/${shortUrl}`}
+                                                            href={`${import.meta.env.VITE_BASE_URL}/shortUrl/${shortUrl}`}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="text-blue-700 hover:underline"
                                                         >
-                                                            {`http://localhost:5173/shortUrl/${shortUrl}`}
+                                                            {`${import.meta.env.VITE_BASE_URL}/shortUrl/${shortUrl}`}
                                                         </a>
                                                     </Typography>
                                                 </td>
