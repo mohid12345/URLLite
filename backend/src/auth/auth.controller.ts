@@ -49,5 +49,33 @@ export class AuthController {
       throw new InternalServerErrorException('Failed to retrieve URL data');
     }
   }
+
+  @Delete(':url')
+  async deleteOne(
+    @Param('url') url: string,
+    @Headers('authorization') authHeader: string
+  ): Promise<any> {
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new Error('No Bearer token found');
+    }
+    const token = authHeader.split(' ')[1];
+    try {
+      return await this.authService.deleteUrl(url, token);
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to delete URL');
+    }
+  }
+
+  @Delete()
+  async deleteAll(
+    @Headers('authorization') authHeader: string
+  ): Promise<any> {
+if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new Error('No Bearer token found');
+    }
+    const token = authHeader.split(' ')[1];
+    return await this.authService.deleteAllUrls(token);
+  }
 }
 

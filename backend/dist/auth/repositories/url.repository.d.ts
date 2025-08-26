@@ -8,4 +8,6 @@ export declare class UrlRepository implements IUrlRepository {
     findByUrl(longUrl: string): Promise<Url | null>;
     findLongUrlFromShort(shortUrl: string): Promise<Url | null>;
     findByUserId(userId: string): Promise<Url[]>;
+    deleteByShortUrl(shortUrl: string): Promise<any>;
+    deleteAllByUserId(userId: string): Promise<void>;
 }

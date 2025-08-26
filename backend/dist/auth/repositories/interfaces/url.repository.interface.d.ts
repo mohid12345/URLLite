@@ -5,4 +5,6 @@ export interface IUrlRepository {
     findByUrl(url: string): Promise<Url>;
     findLongUrlFromShort(key: string): Promise<Url>;
     findByUserId(userId: string): Promise<Url[] | null>;
+    deleteByShortUrl(url: string): Promise<any>;
+    deleteAllByUserId(userId: string): Promise<void>;
 }

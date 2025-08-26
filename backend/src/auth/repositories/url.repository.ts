@@ -17,9 +17,26 @@ export class UrlRepository implements IUrlRepository {
   }
 
   async findLongUrlFromShort(shortUrl: string): Promise<Url | null> {
-    return this.urlModel.findOne({ shortUrl }).exec()
+    console.log("my string ::", shortUrl);
+
+    const urlDoc = await this.urlModel.findOneAndUpdate(
+      { shortUrl },
+      { $inc: { count: 1 } },
+      { new: true }
+    ).exec();
+    return urlDoc
   }
+
   async findByUserId(userId: string): Promise<Url[]> {
     return this.urlModel.find({ userId }).exec();
+  }
+
+  async deleteByShortUrl(shortUrl: string): Promise<any> {
+    return await this.urlModel.deleteOne({ shortUrl }).exec();
+
+  }
+
+  async deleteAllByUserId(userId: string): Promise<void> {
+    await this.urlModel.deleteMany({ userId }).exec();
   }
 }

@@ -18,4 +18,6 @@ export declare class AuthController {
     }>;
     getUserUrls(authHeader: string): Promise<import("./schemas/urlSchema").Url[]>;
     getUrlData(id: string): Promise<any>;
+    deleteOne(url: string, authHeader: string): Promise<any>;
+    deleteAll(authHeader: string): Promise<any>;
 }

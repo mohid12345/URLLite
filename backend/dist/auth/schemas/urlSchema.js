@@ -31,6 +31,10 @@ __decorate([
     (0, mongoose_1.Prop)({ default: Date.now }),
     __metadata("design:type", Date)
 ], Url.prototype, "createdAt", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: 0 }),
+    __metadata("design:type", Number)
+], Url.prototype, "count", void 0);
 exports.Url = Url = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], Url);

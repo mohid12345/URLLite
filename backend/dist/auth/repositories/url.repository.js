@@ -29,10 +29,18 @@ let UrlRepository = class UrlRepository {
         return this.urlModel.findOne({ longUrl }).exec();
     }
     async findLongUrlFromShort(shortUrl) {
-        return this.urlModel.findOne({ shortUrl }).exec();
+        console.log("my string ::", shortUrl);
+        const urlDoc = await this.urlModel.findOneAndUpdate({ shortUrl }, { $inc: { count: 1 } }, { new: true }).exec();
+        return urlDoc;
     }
     async findByUserId(userId) {
         return this.urlModel.find({ userId }).exec();
+    }
+    async deleteByShortUrl(shortUrl) {
+        return await this.urlModel.deleteOne({ shortUrl }).exec();
+    }
+    async deleteAllByUserId(userId) {
+        await this.urlModel.deleteMany({ userId }).exec();
     }
 };
 exports.UrlRepository = UrlRepository;

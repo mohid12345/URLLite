@@ -47,6 +47,25 @@ let AuthController = class AuthController {
             throw new common_2.InternalServerErrorException('Failed to retrieve URL data');
         }
     }
+    async deleteOne(url, authHeader) {
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            throw new Error('No Bearer token found');
+        }
+        const token = authHeader.split(' ')[1];
+        try {
+            return await this.authService.deleteUrl(url, token);
+        }
+        catch (error) {
+            throw new common_2.InternalServerErrorException('Failed to delete URL');
+        }
+    }
+    async deleteAll(authHeader) {
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            throw new Error('No Bearer token found');
+        }
+        const token = authHeader.split(' ')[1];
+        return await this.authService.deleteAllUrls(token);
+    }
 };
 exports.AuthController = AuthController;
 __decorate([
@@ -84,6 +103,21 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "getUrlData", null);
+__decorate([
+    (0, common_1.Delete)(':url'),
+    __param(0, (0, common_1.Param)('url')),
+    __param(1, (0, common_1.Headers)('authorization')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "deleteOne", null);
+__decorate([
+    (0, common_1.Delete)(),
+    __param(0, (0, common_1.Headers)('authorization')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "deleteAll", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService])

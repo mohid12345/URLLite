@@ -66,7 +66,7 @@ let AuthService = class AuthService {
             const baseUrl = this.configService.get('LOCAL_URL');
             if (exedUrl) {
                 return {
-                    shortUrl: `${baseUrl}${exedUrl.shortUrl}`
+                    shortUrl: `${exedUrl.shortUrl}`
                 };
             }
             const shortId = shortid.generate();
@@ -76,7 +76,7 @@ let AuthService = class AuthService {
                 userId: userId
             });
             return {
-                shortUrl: `${baseUrl}${shortId}`
+                shortUrl: `${shortId}`
             };
         }
         catch (error) {
@@ -87,7 +87,6 @@ let AuthService = class AuthService {
     async getUrlData(id) {
         try {
             const url = await this.urlRepository.findLongUrlFromShort(id);
-            console.log("out url::", url);
             if (!url) {
                 throw new common_1.BadRequestException('This Id is not valid');
             }
@@ -105,6 +104,7 @@ let AuthService = class AuthService {
                 throw new common_1.UnauthorizedException('Invalid token');
             }
             const urls = await this.urlRepository.findByUserId(userId);
+            console.log("all urls ::", urls);
             if (!urls || urls.length === 0) {
                 throw new common_1.NotFoundException('No shortened URLs found for this user.');
             }
@@ -114,7 +114,37 @@ let AuthService = class AuthService {
             if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
                 throw new common_1.UnauthorizedException('Invalid or expired token');
             }
+            if (error instanceof common_1.NotFoundException || error instanceof common_1.UnauthorizedException) {
+                throw error;
+            }
             throw new common_1.InternalServerErrorException('Failed to fetch user URLs');
+        }
+    }
+    async deleteUrl(shortUrl, token) {
+        try {
+            const decodedToken = this.jwtService.verify(token);
+            const userId = decodedToken.userId;
+            const rmResult = await this.urlRepository.deleteByShortUrl(shortUrl);
+            if (rmResult.deletedCount && rmResult.deletedCount > 0) {
+                return { message: 'URL deleted successfully' };
+            }
+            else {
+                return { message: 'URL delete unsuccessfull' };
+            }
+        }
+        catch (error) {
+            throw new common_1.InternalServerErrorException('Failed to delete URL');
+        }
+    }
+    async deleteAllUrls(token) {
+        try {
+            const decodedToken = this.jwtService.verify(token);
+            const userId = decodedToken.userId;
+            await this.urlRepository.deleteAllByUserId(userId);
+            return { message: 'All URLs deleted successfully' };
+        }
+        catch (error) {
+            throw new common_1.InternalServerErrorException('Failed to delete all URLs');
         }
     }
 };

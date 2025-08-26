@@ -18,5 +18,8 @@ export class Url extends Document {
   @Prop({ default: Date.now})
   createdAt: Date
 
+  @Prop({default: 0})
+  count: Number
+
 }
 export const UrlSchema = SchemaFactory.createForClass(Url);

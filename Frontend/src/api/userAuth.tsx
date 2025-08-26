@@ -33,3 +33,21 @@ export const getHistory = async () => {
         },
     });
 };
+
+export const deleteUrl = async(url: string) => {
+    const token = localStorage.getItem("userToken");
+    return await Api.delete(`/auth/${url}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    })
+}
+
+export const clearHistory = async() => {
+    const token = localStorage.getItem("userToken");
+    return await Api.delete(`/auth`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    })
+}

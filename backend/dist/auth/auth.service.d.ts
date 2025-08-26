@@ -24,4 +24,10 @@ export declare class AuthService {
     }>;
     getUrlData(id: string): Promise<String>;
     getUserUrls(token: string): Promise<import("./schemas/urlSchema").Url[]>;
+    deleteUrl(shortUrl: string, token: string): Promise<{
+        message: string;
+    }>;
+    deleteAllUrls(token: string): Promise<{
+        message: string;
+    }>;
 }
