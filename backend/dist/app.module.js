@@ -14,6 +14,7 @@ const mongoose_1 = require("@nestjs/mongoose");
 const auth_module_1 = require("./auth/auth.module");
 const config_1 = require("@nestjs/config");
 const jwt_1 = require("@nestjs/jwt");
+const token_module_1 = require("./token/token.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -24,14 +25,7 @@ exports.AppModule = AppModule = __decorate([
                 isGlobal: true,
                 envFilePath: '.env',
             }),
-            jwt_1.JwtModule.registerAsync({
-                imports: [config_1.ConfigModule],
-                useFactory: async (configService) => ({
-                    secret: configService.get('JWT_SecretKey'),
-                }),
-                global: true,
-                inject: [config_1.ConfigService],
-            }),
+            jwt_1.JwtModule.register({}),
             mongoose_1.MongooseModule.forRootAsync({
                 imports: [config_1.ConfigModule],
                 useFactory: async (configService) => ({
@@ -39,6 +33,7 @@ exports.AppModule = AppModule = __decorate([
                 }),
                 inject: [config_1.ConfigService],
             }),
+            token_module_1.TokenModule,
             auth_module_1.AuthModule,
         ],
         controllers: [app_controller_1.AppController],

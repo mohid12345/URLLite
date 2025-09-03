@@ -17,6 +17,7 @@ const user_repository_1 = require("./repositories/user.repository");
 const url_repository_1 = require("./repositories/url.repository");
 const user_repository_interface_1 = require("./repositories/interfaces/user.repository.interface");
 const url_repository_interface_1 = require("./repositories/interfaces/url.repository.interface");
+const token_module_1 = require("../token/token.module");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -27,13 +28,15 @@ exports.AuthModule = AuthModule = __decorate([
                 { name: userSchema_1.User.name, schema: userSchema_1.UserSchema },
                 { name: urlSchema_1.Url.name, schema: urlSchema_1.UrlSchema },
             ]),
+            token_module_1.TokenModule,
         ],
         controllers: [auth_controller_1.AuthController],
         providers: [
             auth_service_1.AuthService,
             { provide: user_repository_interface_1.IUserRepositoryToken, useClass: user_repository_1.UserRepository },
-            { provide: url_repository_interface_1.IUrlRepositoryToken, useClass: url_repository_1.UrlRepository }
+            { provide: url_repository_interface_1.IUrlRepositoryToken, useClass: url_repository_1.UrlRepository },
         ],
+        exports: [auth_service_1.AuthService],
     })
 ], AuthModule);
 //# sourceMappingURL=auth.module.js.map

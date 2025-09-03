@@ -24,9 +24,15 @@ let UserRepository = class UserRepository {
     async findByEmail(email) {
         return this.userModel.findOne({ email }).exec();
     }
+    async findById(userId) {
+        return this.userModel.findById(userId).exec();
+    }
     async create(user) {
         const newUser = new this.userModel(user);
         return newUser.save();
+    }
+    async updateRefreshToken(userId, refreshToken) {
+        await this.userModel.findByIdAndUpdate(userId, { refreshToken }).exec();
     }
 };
 exports.UserRepository = UserRepository;

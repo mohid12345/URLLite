@@ -8,6 +8,8 @@ import { UserRepository } from './repositories/user.repository';
 import { UrlRepository } from './repositories/url.repository';
 import { IUserRepositoryToken } from './repositories/interfaces/user.repository.interface';
 import { IUrlRepositoryToken } from './repositories/interfaces/url.repository.interface';
+import { TokenModule } from '../token/token.module'; 
+
 
 @Module({
   imports: [
@@ -15,14 +17,14 @@ import { IUrlRepositoryToken } from './repositories/interfaces/url.repository.in
       { name: User.name, schema: UserSchema },
       { name: Url.name, schema: UrlSchema },
     ]),
+    TokenModule,  // brings in ACCESS_TOKEN_SERVICE + REFRESH_TOKEN_SERVICE
   ],
   controllers: [AuthController],
   providers: [
     AuthService,
-     //for defining custom providers using interfaces.
-    //Bind interface to implementation
-     { provide: IUserRepositoryToken , useClass: UserRepository},
-     { provide: IUrlRepositoryToken, useClass: UrlRepository}
-    ],
+    { provide: IUserRepositoryToken, useClass: UserRepository },
+    { provide: IUrlRepositoryToken, useClass: UrlRepository },
+  ],
+  exports: [AuthService],
 })
 export class AuthModule {}

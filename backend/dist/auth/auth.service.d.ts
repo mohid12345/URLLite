@@ -8,17 +8,23 @@ import { ConfigService } from '@nestjs/config';
 export declare class AuthService {
     private readonly userRepository;
     private readonly urlRepository;
-    private jwtService;
+    private readonly accessTokenService;
+    private readonly refreshTokenService;
     private readonly configService;
-    constructor(userRepository: IUserRepository, urlRepository: IUrlRepository, jwtService: JwtService, configService: ConfigService);
+    constructor(userRepository: IUserRepository, urlRepository: IUrlRepository, accessTokenService: JwtService, refreshTokenService: JwtService, configService: ConfigService);
     create(createAuthDto: CreateAuthDto): Promise<{
         message: string;
     }>;
     signIn(loginAuthDto: LoginAuthDto): Promise<{
-        message: string;
-        userId: unknown;
-        Access_Token: string;
+        userId: string;
+        accessToken: string;
+        refreshToken: string;
     }>;
+    refreshTokens(refreshToken: string): Promise<{
+        accessToken: string;
+        refreshToken: string;
+    }>;
+    logout(userId: string): Promise<void>;
     createUrl(createUrlDto: CreateUrlDto): Promise<{
         shortUrl: string;
     }>;

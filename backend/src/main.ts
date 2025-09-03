@@ -1,9 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { MorganLoggerService } from './auth/logger';
 import * as morgan from 'morgan';
+import * as cookieParser from 'cookie-parser'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,6 +17,7 @@ async function bootstrap() {
   // Use morgan middleware with the NestJS application
   app.use(morgan('combined', { stream: { write:(message)=>morganLogger.log(message.trim()) } }));
  
+  app.use(cookieParser())
   console.log('✅ NestJS is starting...');
 
   app.enableCors({

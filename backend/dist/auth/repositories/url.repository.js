@@ -29,7 +29,6 @@ let UrlRepository = class UrlRepository {
         return this.urlModel.findOne({ longUrl }).exec();
     }
     async findLongUrlFromShort(shortUrl) {
-        console.log("my string ::", shortUrl);
         const urlDoc = await this.urlModel.findOneAndUpdate({ shortUrl }, { $inc: { count: 1 } }, { new: true }).exec();
         return urlDoc;
     }

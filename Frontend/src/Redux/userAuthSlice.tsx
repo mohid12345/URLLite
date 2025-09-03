@@ -1,29 +1,38 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
-  const initialState= {
-     userAuthStatus:localStorage.getItem("userToken")?true:false 
-  }
+const initialState = {
+    userAuthStatus: false,
+    accessToken: null, // ✅ store access token in memory
+    userId: null,
+};
 
-export const userAuthSlice = createSlice({ 
-  name: 'counter',
-  initialState,
+export const userAuthSlice = createSlice({
+    name: "auth",
+    initialState,
 
-  reducers:{
+    reducers: {
+        login: (state, action) => {
+            console.log("✅ User logged in",action.payload.accessToken);
+            console.log("✅ User logged in 2",action.payload.userId);
+            state.userAuthStatus = true;
+            state.accessToken = action.payload.accessToken; // only store access token
+            state.userId = action.payload.userId
+            // ❌ Do NOT store refresh token here
+        },
 
-   login:(state,action)=>{
-        console.log('hiiiii mohid login')
-       state.userAuthStatus=true
-       localStorage.setItem("userToken",action.payload)   
-   },
+        logout: (state) => {
+            console.log("🚪 User logged out");
+            state.userAuthStatus = false;
+            state.accessToken = null;
+            // refresh token is automatically cleared when backend clears cookie
+        },
 
-   logout:(state)=>{
-      console.log("hiiiiiiiiii mohid logout")
-       state.userAuthStatus=false
-       localStorage.removeItem("userToken");
-   }
-
-  },
+        setAccessToken: (state, action) => {
+            // for refreshing expired tokens
+            state.accessToken = action.payload;
+        },
+    },
 });
 
-export const {login,logout} = userAuthSlice.actions;
+export const { login, logout, setAccessToken } = userAuthSlice.actions;
 export default userAuthSlice.reducer;

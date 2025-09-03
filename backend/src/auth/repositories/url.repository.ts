@@ -17,7 +17,6 @@ export class UrlRepository implements IUrlRepository {
   }
 
   async findLongUrlFromShort(shortUrl: string): Promise<Url | null> {
-    console.log("my string ::", shortUrl);
 
     const urlDoc = await this.urlModel.findOneAndUpdate(
       { shortUrl },

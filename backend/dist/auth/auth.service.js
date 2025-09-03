@@ -21,10 +21,11 @@ const user_repository_interface_1 = require("./repositories/interfaces/user.repo
 const url_repository_interface_1 = require("./repositories/interfaces/url.repository.interface");
 const config_1 = require("@nestjs/config");
 let AuthService = class AuthService {
-    constructor(userRepository, urlRepository, jwtService, configService) {
+    constructor(userRepository, urlRepository, accessTokenService, refreshTokenService, configService) {
         this.userRepository = userRepository;
         this.urlRepository = urlRepository;
-        this.jwtService = jwtService;
+        this.accessTokenService = accessTokenService;
+        this.refreshTokenService = refreshTokenService;
         this.configService = configService;
     }
     async create(createAuthDto) {
@@ -46,18 +47,46 @@ let AuthService = class AuthService {
     async signIn(loginAuthDto) {
         const { email, password } = loginAuthDto;
         const existEmail = await this.userRepository.findByEmail(email);
-        if (!existEmail) {
+        if (!existEmail)
             throw new common_1.UnauthorizedException('Email is not valid');
-        }
-        if (!(await bcrypt.compare(password, existEmail.password))) {
+        const isPasswordValid = await bcrypt.compare(password, existEmail.password);
+        if (!isPasswordValid)
             throw new common_1.UnauthorizedException('Password does not match');
-        }
         const payload = { userId: existEmail._id };
-        return {
-            message: 'Successfully logged in',
-            userId: existEmail._id,
-            Access_Token: await this.jwtService.sign(payload),
-        };
+        const accessToken = await this.accessTokenService.signAsync(payload);
+        const refreshToken = await this.refreshTokenService.signAsync(payload);
+        const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+        await this.userRepository.updateRefreshToken(existEmail._id, hashedRefreshToken);
+        return { userId: existEmail._id, accessToken, refreshToken };
+    }
+    async refreshTokens(refreshToken) {
+        try {
+            const payload = await this.refreshTokenService.verifyAsync(refreshToken);
+            const userId = payload.userId;
+            const user = await this.userRepository.findById(userId);
+            if (!user || !user.refreshToken) {
+                throw new common_1.UnauthorizedException('Access Denied');
+            }
+            const isValid = await bcrypt.compare(refreshToken, user.refreshToken);
+            if (!isValid) {
+                throw new common_1.UnauthorizedException('Invalid refresh token');
+            }
+            const newPayload = { userId: user._id };
+            const newAccessToken = await this.accessTokenService.signAsync(newPayload);
+            const newRefreshToken = await this.refreshTokenService.signAsync(newPayload);
+            const hashedRefreshToken = await bcrypt.hash(newRefreshToken, 10);
+            await this.userRepository.updateRefreshToken(user._id, hashedRefreshToken);
+            return {
+                accessToken: newAccessToken,
+                refreshToken: newRefreshToken,
+            };
+        }
+        catch (err) {
+            throw new common_1.UnauthorizedException('Invalid or expired refresh token');
+        }
+    }
+    async logout(userId) {
+        return this.userRepository.updateRefreshToken(userId, null);
     }
     async createUrl(createUrlDto) {
         const { url, userId } = createUrlDto;
@@ -98,7 +127,7 @@ let AuthService = class AuthService {
     }
     async getUserUrls(token) {
         try {
-            const decodedToken = this.jwtService.verify(token);
+            const decodedToken = await this.accessTokenService.verifyAsync(token);
             const userId = decodedToken.userId;
             if (!userId) {
                 throw new common_1.UnauthorizedException('Invalid token');
@@ -106,7 +135,7 @@ let AuthService = class AuthService {
             const urls = await this.urlRepository.findByUserId(userId);
             console.log("all urls ::", urls);
             if (!urls || urls.length === 0) {
-                throw new common_1.NotFoundException('No shortened URLs found for this user.');
+                return [];
             }
             return urls;
         }
@@ -122,7 +151,7 @@ let AuthService = class AuthService {
     }
     async deleteUrl(shortUrl, token) {
         try {
-            const decodedToken = this.jwtService.verify(token);
+            const decodedToken = await this.accessTokenService.verifyAsync(token);
             const userId = decodedToken.userId;
             const rmResult = await this.urlRepository.deleteByShortUrl(shortUrl);
             if (rmResult.deletedCount && rmResult.deletedCount > 0) {
@@ -138,7 +167,7 @@ let AuthService = class AuthService {
     }
     async deleteAllUrls(token) {
         try {
-            const decodedToken = this.jwtService.verify(token);
+            const decodedToken = await this.accessTokenService.verifyAsync(token);
             const userId = decodedToken.userId;
             await this.urlRepository.deleteAllByUserId(userId);
             return { message: 'All URLs deleted successfully' };
@@ -153,7 +182,10 @@ exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, common_1.Inject)(user_repository_interface_1.IUserRepositoryToken)),
     __param(1, (0, common_1.Inject)(url_repository_interface_1.IUrlRepositoryToken)),
+    __param(2, (0, common_1.Inject)('ACCESS_TOKEN_SERVICE')),
+    __param(3, (0, common_1.Inject)('REFRESH_TOKEN_SERVICE')),
     __metadata("design:paramtypes", [Object, Object, jwt_1.JwtService,
+        jwt_1.JwtService,
         config_1.ConfigService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

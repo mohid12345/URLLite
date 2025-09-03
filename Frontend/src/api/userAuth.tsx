@@ -5,8 +5,16 @@ export const signUp = async (email: string, username: string, password: string) 
 };
 
 export const signIn = async (email: string, password: string) => {
-    return await Api.post("/auth/login", { email, password });
+    return await Api.post("/auth/login", { email, password });//cookie set by server
 };
+
+
+export const refresh = () =>
+  Api.post("/auth/refresh", {}); // mostly used by interceptor
+
+export const logout = () =>
+  Api.post("/auth/logout", {}); // backend should clear cookie + DB refresh token
+
 
 export const CreateUrl = async (url: string, userId: string) => {
     const token = localStorage.getItem("userToken");

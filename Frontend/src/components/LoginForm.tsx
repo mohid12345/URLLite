@@ -7,55 +7,48 @@ import { signIn } from "../api/userAuth";
 import axios from "axios";
 import { FaRegEyeSlash, FaRegEye } from "react-icons/fa";
 import { useState } from "react";
+import { useSnackbar } from "./SnackbarProvider";
 
 interface LoginFormData {
-    email: string;
-    password: string;
+  email: string;
+  password: string;
 }
 
 function LoginForm() {
-    const [showPassword, setShowPassword] = useState(false);
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const {
-        register,
-        handleSubmit,
-        setValue,
-        setError,
-        formState: { errors },
-    } = useForm<LoginFormData>();
+  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { showMessage } = useSnackbar();
 
-    const onFormSubmit = async (data: LoginFormData) => {
-        try {
-            const { email, password } = data;
-            const response = await signIn(email, password);
-            console.log(response);
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<LoginFormData>();
 
-            if (response.data.message == "Email is not valid") {
-                setError("email", {
-                    type: "server",
-                    message: response?.data.message,
-                });
-                return;
-            }
+  const onFormSubmit = async (data: LoginFormData) => {
+    try {
+      const { email, password } = data;
+      const response = await signIn(email, password); // ✅ already has withCredentials inside Api
 
-            if (response.data.message == "Password is not match") {
-                setError("password", {
-                    type: "server",
-                    message: response?.data.message,
-                });
-                return;
-            }
-            sessionStorage.setItem("userId", response.data.userId);
-            dispatch(login(response.data.Access_Token));
+      console.log("🔑 Login response:", response.data.accessToken);
 
-            navigate("/");
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                console.log(error.response?.data);
-            }
-        }
-    };
+      if (response.status >= 200 && response.status < 300) {
+        // ✅ Dispatch accessToken only (no refresh token, no sessionStorage)
+
+        dispatch(login({ accessToken: response.data.accessToken, userId: response.data.userId }));
+
+        showMessage("✅ Successfully logged in!");
+        navigate("/");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errMsg = error.response?.data?.message || "An error occurred during login";
+        showMessage("❌ Error: " + errMsg);
+      }
+    }
+  };
 
     return (
         <div>

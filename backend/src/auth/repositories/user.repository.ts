@@ -12,9 +12,17 @@ export class UserRepository implements IUserRepository {
     return this.userModel.findOne({ email }).exec();
   }
 
+  async findById(userId: string): Promise<User | null> {
+    return this.userModel.findById(userId).exec();
+  }
+
   async create(user: Partial<User>): Promise<User> {
     const newUser = new this.userModel(user);
     return newUser.save();
+  }
+
+  async updateRefreshToken(userId: string, refreshToken: string | null): Promise<void> {
+    await this.userModel.findByIdAndUpdate(userId, { refreshToken }).exec();
   }
 
 }

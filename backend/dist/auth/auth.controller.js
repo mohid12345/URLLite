@@ -26,8 +26,33 @@ let AuthController = class AuthController {
     async create(createAuthDto) {
         return await this.authService.create(createAuthDto);
     }
-    async signIn(loginAuthDto) {
-        return await this.authService.signIn(loginAuthDto);
+    async signIn(loginAuthDto, res) {
+        const { accessToken, refreshToken, userId } = await this.authService.signIn(loginAuthDto);
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+        return {
+            message: 'Successfully logged in',
+            userId,
+            accessToken,
+        };
+    }
+    async refresh(req, res) {
+        const refreshToken = req.cookies?.refreshToken;
+        console.log("refresh : 0000", req.cookies?.refreshToken);
+        if (!refreshToken) {
+            throw new common_1.UnauthorizedException('No refresh token provided');
+        }
+        const tokens = await this.authService.refreshTokens(refreshToken);
+        res.cookie('refreshToken', tokens.refreshToken, {
+            httpOnly: true,
+            sameSite: 'strict',
+            secure: process.env.NODE_ENV === 'production',
+        });
+        return res.json({ accessToken: tokens.accessToken });
     }
     async createUrl(createUrlDto) {
         return await this.authService.createUrl(createUrlDto);
@@ -78,10 +103,19 @@ __decorate([
 __decorate([
     (0, common_1.Post)('login'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [login_auth_dto_1.LoginAuthDto]),
+    __metadata("design:paramtypes", [login_auth_dto_1.LoginAuthDto, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "signIn", null);
+__decorate([
+    (0, common_1.Post)('refresh'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "refresh", null);
 __decorate([
     (0, common_1.Post)("createUrl"),
     __param(0, (0, common_1.Body)()),
